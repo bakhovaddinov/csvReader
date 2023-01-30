@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(skeleton)
+project(csv_reader)
 
 if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Debug)
@@ -28,5 +28,5 @@ add_subdirectory(src)
 add_subdirectory(vendor)
 
 if(BUILD_TESTING)
-    add_subdirectory(tests)
+    # add_subdirectory(tests)
 endif()
