@@ -11,6 +11,7 @@
 #include <string_view>
 #include <type_traits>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 std::unordered_map<std::string, int> split_headers(const std::string &headers_row)
@@ -43,6 +44,7 @@ std::pair<int, std::vector<std::string>> split_rows(const std::string &row_line)
     size_t begin = 0;
     size_t end = row_line.find(',', begin);
     std::vector<std::string> row_values;
+    std::vector<std::string> expressions;
     int row_index = stoi(row_line.substr(begin, end));
     begin = end + 1;
     while ((end = row_line.find(',', begin)) != std::string_view::npos) {
@@ -55,12 +57,102 @@ std::pair<int, std::vector<std::string>> split_rows(const std::string &row_line)
     return {row_index, row_values};
 }
 
+// std::pair<std::vector<std::string>, std::vector<char>> unfold_value(const std::string &value)
+// {
+//     //A1 + B5 -> B5 = H5 + C8
+//     std::vector<std::string> nested_values;
+//     std::vector<char> nested_operations;
+//     for (auto sign : {'+', '-', '*', '/'}) { //make const array
+//         if (auto position = value.find(sign); position != value.npos) {
+//             nested_values.push_back(value.substr(0, position));
+//             nested_values.push_back(value.substr(position, value.size()));
+//             nested_operations.push_back(sign);
+//         }
+//         for (auto value : nested_values) {
+//             unfold_value(value);
+//         }
+//     }
+//     return std::make_pair(nested_values, nested_operations);
+// }
+
+// std::string calculate_value(const std::string &value, ) {
+
+// }
+// func(&cell):
+//
+
 // unordered map<string, int> headers;
 // vector<vector<string>> rows;
 // unordered_map <int, int> orders; A1
 // int column_index = headers[A]
 // int row_index = orders[1]
 // string value = rows[row_index][column_index]
+
+bool is_number(const std::string &s)
+{
+    std::string::const_iterator it = s.begin();
+    while (it != s.end() && std::isdigit(*it))
+        ++it;
+    return !s.empty() && it == s.end();
+}
+
+std::string calculate_value(const std::string &value);
+
+int unfold_value(const std::string &value)
+{
+    std::vector<char> signs = {'+', '-', '*', '/'};
+    std::string arg1;
+    std::string arg2;
+    char operation;
+    for (auto sign : signs) {
+        if (auto operation = value.find(sign); operation != value.npos) {
+            arg1 = value.substr(1, operation);
+            arg2 = value.substr(operation + 1, value.size());
+        }
+        operation = sign;
+    }
+    if (!is_number(arg1)) {
+        arg1 = calculate_value(arg1);
+    }
+
+    if (!is_number(arg2)) {
+        arg2 = calculate_value(arg2);
+    }
+
+    switch (operation) {
+    case '+':
+        return stoi(arg1) + stoi(arg2);
+    case '-':
+        return stoi(arg1) - stoi(arg2);
+    case '*':
+        return stoi(arg1) * stoi(arg2);
+    case '/':
+        return stoi(arg1) / stoi(arg2);
+    }
+}
+
+std::string calculate_value(const std::string &value)
+{
+    if (value[0] == '=') {
+        return std::to_string(unfold_value(value));
+    }
+    return value;
+}
+
+// table["A1"] = "asdf"
+class Table
+{
+  private:
+    std::unordered_map<std::string, std::string> table;
+    std::vector<std::string> columns;
+    std::vector<std::string> row_indexes;
+
+  public:
+    std::string GetValue(const std::string &adress)
+    {
+        return table[adress];
+    }
+};
 
 int main(int argc, char **argv)
 {
@@ -74,8 +166,6 @@ int main(int argc, char **argv)
         return EXIT_FAILURE;
     }
     std::ifstream csv_file(file_name);
-
-    std::vector<std::vector<std::string>> table;
 
     std::string column;
     std::getline(csv_file, column);
