@@ -11,11 +11,9 @@ namespace csv_reader::core
 class CsvTable
 {
   public:
-    CsvTable(std::istream &input);
-    CsvTable(const std::string &file_name);
+    CsvTable(std::string &input);
     std::string operator[](const std::string &address);
-
-    static CsvTable from_file(const std::string &file_name);
+    void print();
 
   private:
     std::unordered_map<std::string, std::string> cells;

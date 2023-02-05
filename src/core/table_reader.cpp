@@ -159,34 +159,10 @@ std::pair<std::string, std::vector<std::string>> split_row(const std::string &ro
 
 } // namespace
 
-constexpr auto CORRECT_FILE_CONTENT = R"(
-,A,B,Cell
-1,1,0,1
-23,0,0,0
-14,=A1+12,=B14+Cell
-)";
-
-void f()
+CsvTable::CsvTable(std::string &file_name)
 {
-    auto stream = std::stringstream(CORRECT_FILE_CONTENT);
-    auto table = CsvTable(stream);
-
-    CsvTable("/home/iskan/my.csv");
-}
-
-CsvTable::CsvTable(const std::string &file_name)
-    : CsvTable(from_file(file_name))
-{
-}
-
-CsvTable CsvTable::from_file(const std::string &file_name)
-{
-    auto stream = std::ifstream(file_name);
-    return CsvTable(stream);
-}
-
-CsvTable::CsvTable(std::istream &input)
-{
+    std::ifstream input;
+    input.open(file_name.c_str());
     std::string headers_line;
     std::getline(input, headers_line);
     headers = split_headers(headers_line);
@@ -208,6 +184,20 @@ std::string CsvTable::operator[](const std::string &address)
     auto it = cells.find(address);
     it->second = unfold_value(it->second, cells);
     return it->second;
+}
+
+void CsvTable::print()
+{
+    std::cout << ',';
+    for (auto header : headers) {
+        std::cout << header << ',';
+    }
+    for (auto row_index : row_indecies) {
+        std::cout << '\n' << row_index;
+        for (auto header : headers) {
+            std::cout << cells[header + row_index] << ',';
+        }
+    }
 }
 
 } // namespace csv_reader::core
