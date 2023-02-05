@@ -21,4 +21,4 @@ endmacro()
 
 include(FetchContent)
 # AddExternalProject(spdlog 1.11.0 https://github.com/gabime/spdlog v1.11.0)
-AddExternalProject(fmt 9.1.0 https://github.com/fmtlib/fmt 9.1.0)
+# AddExternalProject(fmt 9.1.0 https://github.com/fmtlib/fmt 9.1.0)
