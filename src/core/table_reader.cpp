@@ -179,6 +179,11 @@ CsvTable::CsvTable(std::string &file_name)
     }
 }
 
+// CsvTable::CsvTable(std::stringstream &string_content)
+// {
+
+// }
+
 std::string CsvTable::operator[](const std::string &address)
 {
     auto it = cells.find(address);
@@ -193,7 +198,7 @@ void CsvTable::print()
         std::cout << header << ',';
     }
     for (auto row_index : row_indecies) {
-        std::cout << '\n' << row_index;
+        std::cout << '\n' << row_index << ',';
         for (auto header : headers) {
             std::cout << cells[header + row_index] << ',';
         }

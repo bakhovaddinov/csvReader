@@ -3,8 +3,6 @@
 #include <filesystem>
 #include <iostream>
 
-namespace csv_reader::core
-{
 int main(int argc, char **argv)
 {
     if (argc != 2) {
@@ -16,8 +14,7 @@ int main(int argc, char **argv)
         std::cout << "File does not exist" << std::endl;
         return EXIT_FAILURE;
     }
-    auto table = CsvTable(file_name);
+    auto table = csv_reader::core::CsvTable(file_name);
     table.print();
     return EXIT_SUCCESS;
 }
-} // namespace csv_reader::core

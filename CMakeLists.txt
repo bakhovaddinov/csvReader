@@ -28,5 +28,5 @@ add_subdirectory(src)
 add_subdirectory(vendor)
 
 if(BUILD_TESTING)
-    # add_subdirectory(tests)
+    add_subdirectory(tests)
 endif()

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <sstream>
 #include <string>
 #include <string_view>
 #include <unordered_map>
@@ -11,7 +12,8 @@ namespace csv_reader::core
 class CsvTable
 {
   public:
-    CsvTable(std::string &input);
+    CsvTable(std::string &file_name);
+    // CsvTable(std::stringstream &string_content);
     std::string operator[](const std::string &address);
     void print();
 
