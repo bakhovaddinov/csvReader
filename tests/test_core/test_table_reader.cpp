@@ -18,4 +18,10 @@ TEST_CASE("Test table reader")
     {
         REQUIRE_THROWS_AS(CsvTable(empty_column_csv), std::invalid_argument);
     }
+    std::string empty_row_index_csv =
+        "/home/iskandar/projects/csvReader/test_data/empty_row_index.csv";
+    SECTION("Check for empty row index error")
+    {
+        REQUIRE_THROWS_AS(CsvTable(empty_row_index_csv), std::invalid_argument);
+    }
 }

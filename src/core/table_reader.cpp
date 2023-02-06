@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cctype>
 #include <charconv>
+#include <cstddef>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -33,16 +34,7 @@ bool is_number(std::string_view s)
 int to_int(std::string_view sv)
 {
     int result{};
-    auto [ptr, ec] = std::from_chars(sv.data(), sv.data() + sv.size(), result);
-
-    if (ec == std::errc()) {
-        std::cout << "Result: " << result << ", ptr -> " << std::quoted(ptr) << '\n';
-    } else if (ec == std::errc::invalid_argument) {
-        std::cout << "That isn't a number.\n";
-    } else if (ec == std::errc::result_out_of_range) {
-        std::cout << "This number is larger than an int.\n";
-    }
-
+    std::from_chars(sv.data(), sv.data() + sv.size(), result);
     return result;
 }
 
@@ -100,9 +92,11 @@ std::string unfold_value(std::string_view value,
         throw std::invalid_argument(error_message);
     }
     char operation = *it;
-    auto arg1 = unfold_value(value.substr(1, operation), cells);
-    auto arg2 = unfold_value(value.substr(operation + 1, value.size()), cells);
-    return std::to_string(calculate_operation(arg1, arg2, operation));
+    size_t position = value.find(operation);
+    auto arg1 = unfold_value(value.substr(1, position - 1), cells);
+    auto arg2 = unfold_value(value.substr(position + 1, value.size()), cells);
+    auto result = std::to_string(calculate_operation(arg1, arg2, operation));
+    return result;
 }
 
 std::vector<std::string> split_headers(const std::string &headers_line)
@@ -139,6 +133,11 @@ std::pair<std::string, std::vector<std::string>> split_row(const std::string &ro
     size_t end = row_line.find(',', begin);
     std::string row_index = row_line.substr(begin, end);
     begin = end + 1;
+    if (!is_number(row_index) || row_index.empty()) {
+        std::string error_message =
+            std::string{"The given row_index is not a positive integer:"} + row_index;
+        throw std::invalid_argument(std::move(error_message));
+    }
     std::vector<std::string> row;
     int current_column = 0;
     while ((end = row_line.find(',', begin)) != std::string::npos) {
@@ -200,9 +199,8 @@ void CsvTable::print()
     for (auto row_index : row_indecies) {
         std::cout << '\n' << row_index << ',';
         for (auto header : headers) {
-            std::cout << cells[header + row_index] << ',';
+            std::cout << (*this)[header + row_index] << ',';
         }
     }
 }
-
 } // namespace csv_reader::core
