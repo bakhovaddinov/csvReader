@@ -21,10 +21,28 @@ namespace csv_reader::core
 namespace
 {
 
-bool is_number(std::string_view s)
+bool isValidInt(std::string_view s)
 {
-    for (auto item : s) {
-        if (!std::isdigit(item)) {
+    if (s.empty()) {
+        return false;
+    }
+
+    int start = 0;
+    int length = s.size();
+
+    if (s[0] == '-') {
+        if (length == 1) {
+            return false;
+        }
+        start = 1;
+    }
+
+    if (s[start] == '0' && length > 1) {
+        return false;
+    }
+
+    for (int i = start; i < length; i++) {
+        if (!std::isdigit(s[i])) {
             return false;
         }
     }
@@ -52,6 +70,9 @@ int calculate_operation(std::string_view arg1, std::string arg2, char operation)
         result = to_int(arg1) * to_int(arg2);
         break;
     case '/':
+        if (to_int(arg2)) {
+            throw std::runtime_error("Math error: Attempted to divide by Zero\n");
+        }
         result = to_int(arg1) / to_int(arg2);
         break;
     default:
@@ -77,7 +98,7 @@ std::string unfold_value(std::string_view value,
                          std::unordered_map<std::string, std::string> &cells)
 {
     if (value[0] != '=') {
-        if (is_number(value)) {
+        if (isValidInt(value)) {
             return std::string(value);
         }
         auto key = std::string(value);
@@ -133,7 +154,7 @@ std::pair<std::string, std::vector<std::string>> split_row(const std::string &ro
     size_t end = row_line.find(',', begin);
     std::string row_index = row_line.substr(begin, end);
     begin = end + 1;
-    if (!is_number(row_index) || row_index.empty()) {
+    if (!isValidInt(row_index) || row_index.empty()) {
         std::string error_message =
             std::string{"The given row_index is not a positive integer:"} + row_index;
         throw std::invalid_argument(std::move(error_message));
@@ -170,18 +191,17 @@ CsvTable::CsvTable(std::string &file_name)
     const auto &headers_size = headers.size();
     while (std::getline(input, current_line)) {
         auto [row_index, row] = split_row(current_line, headers);
-        row_indecies.push_back(row_index);
+        row_indices.push_back(row_index);
         for (int i = 0; i < headers_size; i++) {
             std::string index = headers[i] + row_index;
             cells[index] = row[i];
         }
     }
+    std::set<std::string> unique_indices(row_indices.begin(), row_indices.end());
+    if (unique_indices.size() != unique_indices.size()) {
+        throw std::invalid_argument("There are non-unique row indices!");
+    }
 }
-
-// CsvTable::CsvTable(std::stringstream &string_content)
-// {
-
-// }
 
 std::string CsvTable::operator[](const std::string &address)
 {
@@ -196,7 +216,7 @@ void CsvTable::print()
     for (auto header : headers) {
         std::cout << header << ',';
     }
-    for (auto row_index : row_indecies) {
+    for (auto row_index : row_indices) {
         std::cout << '\n' << row_index << ',';
         for (auto header : headers) {
             std::cout << (*this)[header + row_index] << ',';
