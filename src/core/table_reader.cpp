@@ -98,10 +98,13 @@ std::string unfold_value(std::string_view value,
                          std::unordered_map<std::string, std::string> &cells)
 {
     if (value[0] != '=') {
-        if (isValidInt(value)) {
-            return std::string(value);
-        }
         auto key = std::string(value);
+        if (isValidInt(value)) {
+            return key;
+        } else if (cells.count(key) == 0) {
+            auto error_message = std::string{"Invalid value: "} + std::string(value);
+            throw std::invalid_argument(error_message);
+        }
         auto it = cells.find(key);
         it->second = unfold_value(it->second, cells);
         return it->second;
